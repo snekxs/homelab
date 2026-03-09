@@ -6,12 +6,22 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/snekxs/homelab
-    targetRevision: HEAD
-    path: apps/zipline
+    repoURL: https://bjw-s-labs.github.io/helm-charts
+    chart: app-template
+    targetRevision: 4.6.2
     helm:
       valueFiles:
-        - values.yaml
+        - $values/apps/zipline/values.yaml
+  sources:
+    - repoURL: https://bjw-s-labs.github.io/helm-charts
+      chart: app-template
+      targetRevision: 4.6.2
+      helm:
+        valueFiles:
+          - $values/apps/zipline/values.yaml
+    - repoURL: https://github.com/snekxs/homelab
+      targetRevision: HEAD
+      ref: values
   destination:
     server: https://kubernetes.default.svc
     namespace: zipline
@@ -19,3 +29,5 @@ spec:
     automated:
       prune: true
       selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
