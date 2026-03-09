@@ -6,7 +6,7 @@ controllers:
           repository: vaultwarden/server
           tag: latest
         env:
-          DOMAIN: "https://vault.snekxs.xyz"   # <CHANGE_ME>
+          DOMAIN: "https://vault.snekxs.xyz"
           WEBSOCKET_ENABLED: "true"
           SIGNUPS_ALLOWED: "false"
           LOG_LEVEL: "warn"
@@ -27,6 +27,7 @@ controllers:
 service:
   app:
     controller: vaultwarden
+    type: NodePort
     ports:
       http:
         port: 80
@@ -39,7 +40,7 @@ ingress:
     annotations:
       cert-manager.io/cluster-issuer: letsencrypt-cloudflare
     hosts:
-      - host: vault.yourdomain.com               # <CHANGE_ME>
+      - host: vault.snekxs.xyz
         paths:
           - path: /
             pathType: Prefix
@@ -53,7 +54,7 @@ ingress:
               port: websocket
     tls:
       - hosts:
-          - vault.yourdomain.com                 # <CHANGE_ME>
+          - vault.snekxs.xyz                 
         secretName: vaultwarden-tls
 
 persistence:
