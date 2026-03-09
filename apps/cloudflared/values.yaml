@@ -1,0 +1,19 @@
+controllers:
+  cloudflared:
+    containers:
+      app:
+        image:
+          repository: cloudflare/cloudflared
+          tag: latest
+        args:
+          - tunnel
+          - --no-autoupdate
+          - run
+          - --token
+          - $(TUNNEL_TOKEN)
+        env:
+          TUNNEL_TOKEN:
+            valueFrom:
+              secretKeyRef:
+                name: tunnel-token
+                key: token
