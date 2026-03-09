@@ -36,9 +36,9 @@ service:
         port: 5432
 persistence:
   uploads:
-    type: persistentVolumeClaim
-    accessMode: ReadWriteOnce
-    size: 10Gi
+    type: hostPath
+    hostPath: /mnt/ssd/zipline/uploads
+    hostPathType: DirectoryOrCreate
     advancedMounts:
       zipline:
         app:
