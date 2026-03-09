@@ -6,7 +6,7 @@ controllers:
           repository: vaultwarden/server
           tag: latest
         env:
-          DOMAIN: "https://vault.yourdomain.com"   # <CHANGE_ME>
+          DOMAIN: "https://vault.snekxs.xyz"   # <CHANGE_ME>
           WEBSOCKET_ENABLED: "true"
           SIGNUPS_ALLOWED: "false"
           LOG_LEVEL: "warn"
