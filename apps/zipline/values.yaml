@@ -1,0 +1,58 @@
+controllers:
+  zipline:
+    containers:
+      app:
+        image:
+          repository: ghcr.io/diced/zipline
+          tag: latest
+        env:
+          CORE_SECRET: "q9S276fXT9obuMvCmcfTTMMTWPEe2pIO"
+          DATABASE_URL: "postgresql://zipline:zipline@localhost:5432/zipline"
+          CORE_HOSTNAME: "0.0.0.0"
+          CORE_PORT: "3000"
+          DATASOURCE_TYPE: "local"
+          DATASOURCE_LOCAL_DIRECTORY: "/zipline/uploads"
+
+  postgres:
+    containers:
+      app:
+        image:
+          repository: postgres
+          tag: "15"
+        env:
+          POSTGRES_USER: "zipline"
+          POSTGRES_PASSWORD: "zipline"
+          POSTGRES_DB: "zipline"
+
+service:
+  zipline:
+    controller: zipline
+    type: NodePort
+    ports:
+      http:
+        port: 3000
+
+  postgres:
+    controller: postgres
+    ports:
+      postgresql:
+        port: 5432
+
+persistence:
+  uploads:
+    type: persistentVolumeClaim
+    accessMode: ReadWriteOnce
+    size: 10Gi
+    advancedMounts:
+      zipline:
+        app:
+          - path: /zipline/uploads
+
+  pgdata:
+    type: persistentVolumeClaim
+    accessMode: ReadWriteOnce
+    size: 5Gi
+    advancedMounts:
+      postgres:
+        app:
+          - path: /var/lib/postgresql/data
