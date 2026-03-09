@@ -1,0 +1,66 @@
+controllers:
+  vaultwarden:
+    containers:
+      app:
+        image:
+          repository: vaultwarden/server
+          tag: latest
+        env:
+          DOMAIN: "https://vault.yourdomain.com"   # <CHANGE_ME>
+          WEBSOCKET_ENABLED: "true"
+          SIGNUPS_ALLOWED: "false"
+          LOG_LEVEL: "warn"
+          DATA_FOLDER: "/data"
+          ADMIN_TOKEN:
+            valueFrom:
+              secretKeyRef:
+                name: vaultwarden-secret
+                key: ADMIN_TOKEN
+        resources:
+          requests:
+            cpu: 50m
+            memory: 64Mi
+          limits:
+            cpu: 500m
+            memory: 256Mi
+
+service:
+  app:
+    controller: vaultwarden
+    ports:
+      http:
+        port: 80
+      websocket:
+        port: 3012
+
+ingress:
+  app:
+    className: traefik
+    annotations:
+      cert-manager.io/cluster-issuer: letsencrypt-cloudflare
+    hosts:
+      - host: vault.yourdomain.com               # <CHANGE_ME>
+        paths:
+          - path: /
+            pathType: Prefix
+            service:
+              identifier: app
+              port: http
+          - path: /notifications/hub
+            pathType: Prefix
+            service:
+              identifier: app
+              port: websocket
+    tls:
+      - hosts:
+          - vault.yourdomain.com                 # <CHANGE_ME>
+        secretName: vaultwarden-tls
+
+persistence:
+  data:
+    type: persistentVolumeClaim
+    accessMode: ReadWriteOnce
+    size: 5Gi
+    storageClass: local-path
+    globalMounts:
+      - path: /data
