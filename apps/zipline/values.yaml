@@ -7,7 +7,7 @@ controllers:
           tag: latest
         env:
           CORE_SECRET: "q9S276fXT9obuMvCmcfTTMMTWPEe2pIO"
-          DATABASE_URL: "postgresql://zipline:zipline@localhost:5432/zipline"
+          DATABASE_URL: "postgresql://zipline:zipline@zipline-postgres:5432/zipline"
           CORE_HOSTNAME: "0.0.0.0"
           CORE_PORT: "3000"
           DATASOURCE_TYPE: "local"
