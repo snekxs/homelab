@@ -10,10 +10,9 @@ controllers:
           DATABASE_URL: "postgresql://zipline:zipline@zipline-postgres:5432/zipline"
           CORE_HOSTNAME: "0.0.0.0"
           CORE_PORT: "3000"
-	  CORE_HTTPS: "true"	
+          CORE_HTTPS: "true"
           DATASOURCE_TYPE: "local"
           DATASOURCE_LOCAL_DIRECTORY: "/zipline/uploads"
-
   postgres:
     containers:
       app:
@@ -24,7 +23,6 @@ controllers:
           POSTGRES_USER: "zipline"
           POSTGRES_PASSWORD: "zipline"
           POSTGRES_DB: "zipline"
-
 service:
   zipline:
     controller: zipline
@@ -32,13 +30,11 @@ service:
     ports:
       http:
         port: 3000
-
   postgres:
     controller: postgres
     ports:
       postgresql:
         port: 5432
-
 persistence:
   uploads:
     type: persistentVolumeClaim
@@ -48,7 +44,6 @@ persistence:
       zipline:
         app:
           - path: /zipline/uploads
-
   pgdata:
     type: persistentVolumeClaim
     accessMode: ReadWriteOnce
