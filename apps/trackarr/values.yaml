@@ -90,9 +90,25 @@ ingress:
             service:
               identifier: app
               port: http
+      - host: announce.snekxs.xyz
+        paths:
+          - path: /
+            pathType: Prefix
+            service:
+              identifier: app
+              port: http
+      - host: monitoring.snekxs.xyz
+        paths:
+          - path: /
+            pathType: Prefix
+            service:
+              identifier: app
+              port: http
     tls:
       - hosts:
           - tracker.snekxs.xyz
+          - announce.snekxs.xyz
+          - monitoring.snekxs.xyz
         secretName: trackarr-tls
 
 persistence:
