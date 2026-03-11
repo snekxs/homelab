@@ -1,0 +1,65 @@
+controllers:
+  radarr:
+    containers:
+      app:
+        image:
+          repository: ghcr.io/linuxserver/radarr
+          tag: latest
+        env:
+          PUID: "1000"
+          PGID: "1000"
+          TZ: "America/Edmonton"
+        resources:
+          requests:
+            cpu: 50m
+            memory: 128Mi
+          limits:
+            cpu: 500m
+            memory: 512Mi
+
+service:
+  app:
+    controller: radarr
+    type: NodePort
+    ports:
+      http:
+        port: 7878
+
+ingress:
+  app:
+    className: traefik
+    annotations:
+      cert-manager.io/cluster-issuer: letsencrypt-cloudflare
+    hosts:
+      - host: radarr.snekxs.xyz
+        paths:
+          - path: /
+            pathType: Prefix
+            service:
+              identifier: app
+              port: http
+    tls:
+      - hosts:
+          - radarr.snekxs.xyz
+        secretName: radarr-tls
+
+persistence:
+  config:
+    type: persistentVolumeClaim
+    accessMode: ReadWriteOnce
+    size: 2Gi
+    storageClass: local-path
+    globalMounts:
+      - path: /config
+  media:
+    type: hostPath
+    hostPath: /mnt/hdd/media
+    hostPathType: DirectoryOrCreate
+    globalMounts:
+      - path: /media
+  downloads:
+    type: hostPath
+    hostPath: /mnt/hdd/downloads
+    hostPathType: DirectoryOrCreate
+    globalMounts:
+      - path: /downloads

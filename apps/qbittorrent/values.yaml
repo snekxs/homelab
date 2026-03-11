@@ -1,0 +1,70 @@
+controllers:
+  qbittorrent:
+    containers:
+      app:
+        image:
+          repository: ghcr.io/linuxserver/qbittorrent
+          tag: latest
+        env:
+          PUID: "1000"
+          PGID: "1000"
+          TZ: "America/Edmonton"
+          WEBUI_PORT: "8080"
+        resources:
+          requests:
+            cpu: 100m
+            memory: 256Mi
+          limits:
+            cpu: 1000m
+            memory: 1Gi
+
+service:
+  app:
+    controller: qbittorrent
+    type: NodePort
+    ports:
+      http:
+        port: 8080
+  bittorrent:
+    controller: qbittorrent
+    type: NodePort
+    ports:
+      tcp:
+        port: 6881
+        protocol: TCP
+      udp:
+        port: 6881
+        protocol: UDP
+
+ingress:
+  app:
+    className: traefik
+    annotations:
+      cert-manager.io/cluster-issuer: letsencrypt-cloudflare
+    hosts:
+      - host: qbit.snekxs.xyz
+        paths:
+          - path: /
+            pathType: Prefix
+            service:
+              identifier: app
+              port: http
+    tls:
+      - hosts:
+          - qbit.snekxs.xyz
+        secretName: qbittorrent-tls
+
+persistence:
+  config:
+    type: persistentVolumeClaim
+    accessMode: ReadWriteOnce
+    size: 1Gi
+    storageClass: local-path
+    globalMounts:
+      - path: /config
+  downloads:
+    type: hostPath
+    hostPath: /mnt/hdd/downloads
+    hostPathType: DirectoryOrCreate
+    globalMounts:
+      - path: /downloads
