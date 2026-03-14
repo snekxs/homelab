@@ -16,6 +16,9 @@ controllers:
           DATASOURCE_TYPE: "local"
           DATASOURCE_LOCAL_DIRECTORY: "/zipline/uploads"
   postgres:
+    pod:
+      nodeSelector:
+        kubernetes.io/hostname: k3s
     containers:
       app:
         image:
@@ -50,6 +53,7 @@ persistence:
     type: persistentVolumeClaim
     accessMode: ReadWriteOnce
     size: 5Gi
+    storageClass: local-path
     advancedMounts:
       postgres:
         app:
