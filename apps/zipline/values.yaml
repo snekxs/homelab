@@ -1,7 +1,7 @@
 controllers:
   zipline:
     pod:
-      NodeSelector:
+      nodeSelector:
         kubernetes.io/hostname: k3s
     containers:
       app:
