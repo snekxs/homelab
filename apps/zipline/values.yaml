@@ -70,3 +70,7 @@ ingress:
       - hosts:
           - zipline.snekxs.xyz
         secretName: zipline-tls
+
+defaultPodOptions:
+  nodeSelector:
+    kubernetes.io/hostname: k3s
