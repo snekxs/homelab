@@ -3,7 +3,7 @@ controllers:
     containers:
       app:
         image:
-          repository: ghcr.io/toeverything/affine-graphql
+          repository: ghcr.io/toeverything/affine
           tag: stable
         env:
           NODE_ENV: "production"
