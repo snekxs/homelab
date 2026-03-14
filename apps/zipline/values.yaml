@@ -57,6 +57,7 @@ ingress:
     className: traefik
     annotations:
       cert-manager.io/cluster-issuer: letsencrypt-cloudflare
+      traefik.ingress.kubernetes.io/proxy-body-size: "0"
     hosts:
       - host: zipline.snekxs.xyz
         paths:
