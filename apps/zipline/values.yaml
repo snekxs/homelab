@@ -1,5 +1,8 @@
 controllers:
   zipline:
+    pod:
+      NodeSelector:
+        kubernetes.io/hostname: k3s
     containers:
       app:
         image:
@@ -71,6 +74,4 @@ ingress:
           - zipline.snekxs.xyz
         secretName: zipline-tls
 
-defaultPodOptions:
-  nodeSelector:
-    kubernetes.io/hostname: k3s
+
