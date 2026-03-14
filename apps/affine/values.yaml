@@ -1,5 +1,21 @@
 controllers:
   affine:
+    initContainers:
+      migrations:
+        image:
+          repository: ghcr.io/toeverything/affine
+          tag: stable
+        command:
+          - node
+          - ./node_modules/.bin/prisma
+          - migrate
+          - deploy
+        env:
+          DATABASE_URL:
+            valueFrom:
+              secretKeyRef:
+                name: affine-secret
+                key: DATABASE_URL
     containers:
       app:
         image:
