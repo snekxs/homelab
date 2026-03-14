@@ -1,0 +1,178 @@
+controllers:
+  affine:
+    containers:
+      app:
+        image:
+          repository: ghcr.io/toeverything/affine-graphql
+          tag: stable
+        env:
+          NODE_ENV: "production"
+          AFFINE_SERVER_HOST: "affine.snekxs.xyz"
+          AFFINE_SERVER_HTTPS: "true"
+          DATABASE_URL:
+            valueFrom:
+              secretKeyRef:
+                name: affine-secret
+                key: DATABASE_URL
+          REDIS_SERVER_HOST: "affine-redis"
+          REDIS_SERVER_PORT: "6379"
+          STORAGE_PROVIDER: "s3"
+          STORAGE_S3_ENDPOINT: "http://affine-minio:9000"
+          STORAGE_S3_REGION: "us-east-1"
+          STORAGE_S3_BUCKET: "affine"
+          STORAGE_S3_ACCESS_KEY_ID:
+            valueFrom:
+              secretKeyRef:
+                name: affine-secret
+                key: MINIO_ROOT_USER
+          STORAGE_S3_SECRET_ACCESS_KEY:
+            valueFrom:
+              secretKeyRef:
+                name: affine-secret
+                key: MINIO_ROOT_PASSWORD
+          STORAGE_S3_PATH_STYLE: "true"
+        resources:
+          requests:
+            cpu: 100m
+            memory: 512Mi
+          limits:
+            cpu: 2000m
+            memory: 2Gi
+
+  postgres:
+    containers:
+      app:
+        image:
+          repository: postgres
+          tag: "16"
+        env:
+          POSTGRES_DB: "affine"
+          POSTGRES_USER: "affine"
+          POSTGRES_PASSWORD:
+            valueFrom:
+              secretKeyRef:
+                name: affine-secret
+                key: POSTGRES_PASSWORD
+        resources:
+          requests:
+            cpu: 100m
+            memory: 256Mi
+          limits:
+            cpu: 1000m
+            memory: 1Gi
+
+  redis:
+    containers:
+      app:
+        image:
+          repository: redis
+          tag: "7-alpine"
+        resources:
+          requests:
+            cpu: 50m
+            memory: 64Mi
+          limits:
+            cpu: 250m
+            memory: 256Mi
+
+  minio:
+    containers:
+      app:
+        image:
+          repository: minio/minio
+          tag: latest
+        args:
+          - server
+          - /data
+          - --console-address
+          - ":9001"
+        env:
+          MINIO_ROOT_USER:
+            valueFrom:
+              secretKeyRef:
+                name: affine-secret
+                key: MINIO_ROOT_USER
+          MINIO_ROOT_PASSWORD:
+            valueFrom:
+              secretKeyRef:
+                name: affine-secret
+                key: MINIO_ROOT_PASSWORD
+        resources:
+          requests:
+            cpu: 50m
+            memory: 128Mi
+          limits:
+            cpu: 500m
+            memory: 512Mi
+
+service:
+  affine:
+    controller: affine
+    type: NodePort
+    ports:
+      http:
+        port: 3010
+  postgres:
+    controller: postgres
+    ports:
+      postgresql:
+        port: 5432
+  redis:
+    controller: redis
+    ports:
+      redis:
+        port: 6379
+  minio:
+    controller: minio
+    ports:
+      api:
+        port: 9000
+      console:
+        port: 9001
+
+ingress:
+  app:
+    className: traefik
+    annotations:
+      cert-manager.io/cluster-issuer: letsencrypt-cloudflare
+    hosts:
+      - host: affine.snekxs.xyz
+        paths:
+          - path: /
+            pathType: Prefix
+            service:
+              identifier: affine
+              port: http
+    tls:
+      - hosts:
+          - affine.snekxs.xyz
+        secretName: affine-tls
+
+persistence:
+  pgdata:
+    type: persistentVolumeClaim
+    accessMode: ReadWriteOnce
+    size: 10Gi
+    storageClass: local-path
+    advancedMounts:
+      postgres:
+        app:
+          - path: /var/lib/postgresql/data
+  affine-data:
+    type: persistentVolumeClaim
+    accessMode: ReadWriteOnce
+    size: 5Gi
+    storageClass: local-path
+    advancedMounts:
+      affine:
+        app:
+          - path: /root/.affine
+  minio-data:
+    type: persistentVolumeClaim
+    accessMode: ReadWriteOnce
+    size: 20Gi
+    storageClass: local-path
+    advancedMounts:
+      minio:
+        app:
+          - path: /data
