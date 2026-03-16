@@ -17,7 +17,7 @@ controllers:
                 key: DB_PASSWORD
           REDIS_HOSTNAME: "immich-redis"
           REDIS_PORT: "6379"
-          UPLOAD_LOCATION: "/photos"
+          UPLOAD_LOCATION: "/data"
           
         resources:
           requests:
@@ -130,7 +130,7 @@ persistence:
     advancedMounts:
       immich:
         app:
-          - path: /photos
+          - path: /data
   ml-cache:
     type: persistentVolumeClaim
     accessMode: ReadWriteOnce
