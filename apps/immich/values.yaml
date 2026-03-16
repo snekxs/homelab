@@ -1,0 +1,151 @@
+controllers:
+  immich:
+    containers:
+      app:
+        image:
+          repository: ghcr.io/immich-app/immich-server
+          tag: release
+        env:
+          DB_HOSTNAME: "immich-postgres"
+          DB_PORT: "5432"
+          DB_DATABASE_NAME: "immich"
+          DB_USERNAME: "immich"
+          DB_PASSWORD:
+            valueFrom:
+              secretKeyRef:
+                name: immich-secret
+                key: DB_PASSWORD
+          REDIS_HOSTNAME: "immich-redis"
+          REDIS_PORT: "6379"
+          UPLOAD_LOCATION: "/photos"
+          IMMICH_SERVER_URL: "http://immich-immich:3001"
+        resources:
+          requests:
+            cpu: 100m
+            memory: 512Mi
+          limits:
+            cpu: 2000m
+            memory: 2Gi
+
+  machine-learning:
+    containers:
+      app:
+        image:
+          repository: ghcr.io/immich-app/immich-machine-learning
+          tag: release
+        env:
+          MACHINE_LEARNING_CACHE_FOLDER: "/cache"
+        resources:
+          requests:
+            cpu: 100m
+            memory: 512Mi
+          limits:
+            cpu: 2000m
+            memory: 4Gi
+
+  postgres:
+    containers:
+      app:
+        image:
+          repository: tensorchord/pgvecto-rs
+          tag: pg16-v0.2.0
+        env:
+          POSTGRES_DB: "immich"
+          POSTGRES_USER: "immich"
+          POSTGRES_PASSWORD:
+            valueFrom:
+              secretKeyRef:
+                name: immich-secret
+                key: DB_PASSWORD
+          POSTGRES_INITDB_ARGS: "--data-checksums"
+        resources:
+          requests:
+            cpu: 100m
+            memory: 256Mi
+          limits:
+            cpu: 1000m
+            memory: 1Gi
+
+  redis:
+    containers:
+      app:
+        image:
+          repository: redis
+          tag: "7-alpine"
+        resources:
+          requests:
+            cpu: 50m
+            memory: 64Mi
+          limits:
+            cpu: 250m
+            memory: 256Mi
+
+service:
+  immich:
+    controller: immich
+    type: NodePort
+    ports:
+      http:
+        port: 3001
+  machine-learning:
+    controller: machine-learning
+    ports:
+      http:
+        port: 3003
+  postgres:
+    controller: postgres
+    ports:
+      postgresql:
+        port: 5432
+  redis:
+    controller: redis
+    ports:
+      redis:
+        port: 6379
+
+ingress:
+  app:
+    className: traefik
+    annotations:
+      cert-manager.io/cluster-issuer: letsencrypt-cloudflare
+      traefik.ingress.kubernetes.io/proxy-body-size: "0"
+    hosts:
+      - host: immich.snekxs.xyz
+        paths:
+          - path: /
+            pathType: Prefix
+            service:
+              identifier: immich
+              port: http
+    tls:
+      - hosts:
+          - immich.snekxs.xyz
+        secretName: immich-tls
+
+persistence:
+  photos:
+    type: hostPath
+    hostPath: /mnt/ssd/immich/photos
+    hostPathType: DirectoryOrCreate
+    advancedMounts:
+      immich:
+        app:
+          - path: /photos
+  ml-cache:
+    type: persistentVolumeClaim
+    accessMode: ReadWriteOnce
+    size: 10Gi
+    storageClass: local-path
+    advancedMounts:
+      machine-learning:
+        app:
+          - path: /cache
+  pgdata:
+    type: persistentVolumeClaim
+    accessMode: ReadWriteOnce
+    size: 10Gi
+    storageClass: local-path
+    advancedMounts:
+      postgres:
+        app:
+          - path: /var/lib/postgresql/data
