@@ -19,6 +19,24 @@ controllers:
             memory: 1Gi
         securityContext:
           privileged: true
+      matter-server:
+        image:
+          repository: ghcr.io/home-assistant-libs/python-matter-server
+          tag: stable
+        args:
+          - --storage-path
+          - /data
+          - --paa-trust-store-path
+          - /data/credentials
+        securityContext:
+          privileged: true
+        resources:
+          requests:
+            cpu: 50m
+            memory: 128Mi
+          limits:
+            cpu: 500m
+            memory: 512Mi
 
 configMaps:
   config:
@@ -72,3 +90,12 @@ persistence:
     globalMounts:
       - path: /config/configuration.yaml
         subPath: configuration.yaml
+  matter-data:
+    type: persistentVolumeClaim
+    accessMode: ReadWriteOnce
+    size: 1Gi
+    storageClass: local-path
+    advancedMounts:
+      home-assistant:
+        matter-server:
+          - path: /data
