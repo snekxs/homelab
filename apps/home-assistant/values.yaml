@@ -20,6 +20,18 @@ controllers:
         securityContext:
           privileged: true
 
+configMaps:
+  config:
+    data:
+      configuration.yaml: |
+        default_config:
+        http:
+          use_x_forwarded_for: true
+          trusted_proxies:
+            - 10.0.0.0/8
+            - 172.16.0.0/12
+            - 192.168.0.0/16
+
 service:
   app:
     controller: home-assistant
@@ -54,3 +66,9 @@ persistence:
     storageClass: local-path
     globalMounts:
       - path: /config
+  ha-config:
+    type: configMap
+    name: home-assistant-config
+    globalMounts:
+      - path: /config/configuration.yaml
+        subPath: configuration.yaml
