@@ -68,7 +68,7 @@ persistence:
       - path: /config
   ha-config:
     type: configMap
-    name: home-assistant-config
+    name: home-assistant-home-assistant-config
     globalMounts:
       - path: /config/configuration.yaml
         subPath: configuration.yaml
