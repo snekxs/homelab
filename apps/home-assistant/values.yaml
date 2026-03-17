@@ -1,0 +1,56 @@
+controllers:
+  home-assistant:
+    pod:
+      hostNetwork: true
+      dnsPolicy: ClusterFirstWithHostNet
+    containers:
+      app:
+        image:
+          repository: ghcr.io/home-assistant/home-assistant
+          tag: stable
+        env:
+          TZ: "America/Edmonton"
+        resources:
+          requests:
+            cpu: 100m
+            memory: 256Mi
+          limits:
+            cpu: 1000m
+            memory: 1Gi
+        securityContext:
+          privileged: true
+
+service:
+  app:
+    controller: home-assistant
+    type: NodePort
+    ports:
+      http:
+        port: 8123
+
+ingress:
+  app:
+    className: traefik
+    annotations:
+      cert-manager.io/cluster-issuer: letsencrypt-cloudflare
+    hosts:
+      - host: ha.snekxs.xyz
+        paths:
+          - path: /
+            pathType: Prefix
+            service:
+              identifier: app
+              port: http
+    tls:
+      - hosts:
+          - ha.snekxs.xyz
+        secretName: home-assistant-tls
+
+persistence:
+  config:
+    type: persistentVolumeClaim
+    accessMode: ReadWriteOnce
+    size: 5Gi
+    storageClass: local-path
+    globalMounts:
+      - path: /config
