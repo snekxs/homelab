@@ -1,0 +1,34 @@
+controllers:
+  ring-mqtt:
+    containers:
+      app:
+        image:
+          repository: tsightler/ring-mqtt
+          tag: latest
+        env:
+          MQTTHOST: "mosquitto.home-assistant.svc.cluster.local"
+          MQTTPORT: "1883"
+          RINGTOKEN: ""  # fill this in after first run
+        resources:
+          requests:
+            cpu: 50m
+            memory: 64Mi
+          limits:
+            cpu: 250m
+            memory: 256Mi
+
+service:
+  app:
+    controller: ring-mqtt
+    ports:
+      http:
+        port: 55123
+
+persistence:
+  data:
+    type: persistentVolumeClaim
+    accessMode: ReadWriteOnce
+    size: 1Gi
+    storageClass: local-path
+    globalMounts:
+      - path: /data
