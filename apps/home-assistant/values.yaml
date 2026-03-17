@@ -26,8 +26,6 @@ controllers:
         args:
           - --storage-path
           - /data
-          - --paa-trust-store-path
-          - /data/credentials
         securityContext:
           privileged: true
         resources:
