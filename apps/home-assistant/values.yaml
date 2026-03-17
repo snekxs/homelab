@@ -50,7 +50,7 @@ configMaps:
         automation: !include automations.yaml
         homeassistant:
           allowlist_external_dirs:
-            - /tmp
+            - /config/www
  
 service:
   app:
