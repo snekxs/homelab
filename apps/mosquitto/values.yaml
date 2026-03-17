@@ -1,0 +1,45 @@
+controllers:
+  mosquitto:
+    containers:
+      app:
+        image:
+          repository: eclipse-mosquitto
+          tag: "2"
+        resources:
+          requests:
+            cpu: 50m
+            memory: 64Mi
+          limits:
+            cpu: 250m
+            memory: 128Mi
+
+configMaps:
+  config:
+    data:
+      mosquitto.conf: |
+        listener 1883
+        allow_anonymous true
+        persistence true
+        persistence_location /mosquitto/data
+
+service:
+  app:
+    controller: mosquitto
+    ports:
+      mqtt:
+        port: 1883
+
+persistence:
+  config:
+    type: configMap
+    name: mosquitto
+    globalMounts:
+      - path: /mosquitto/config/mosquitto.conf
+        subPath: mosquitto.conf
+  data:
+    type: persistentVolumeClaim
+    accessMode: ReadWriteOnce
+    size: 1Gi
+    storageClass: local-path
+    globalMounts:
+      - path: /mosquitto/data
