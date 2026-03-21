@@ -1,0 +1,9 @@
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: zipline-no-body-limit
+  namespace: zipline
+spec:
+  buffering:
+    maxRequestBodyBytes: 0
+    memRequestBodyBytes: 0

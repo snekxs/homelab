@@ -28,6 +28,7 @@ controllers:
           POSTGRES_USER: "zipline"
           POSTGRES_PASSWORD: "zipline"
           POSTGRES_DB: "zipline"
+
 service:
   zipline:
     controller: zipline
@@ -40,6 +41,7 @@ service:
     ports:
       postgresql:
         port: 5432
+
 persistence:
   uploads:
     type: hostPath
@@ -64,7 +66,7 @@ ingress:
     className: traefik
     annotations:
       cert-manager.io/cluster-issuer: letsencrypt-cloudflare
-      traefik.ingress.kubernetes.io/proxy-body-size: "0"
+      traefik.ingress.kubernetes.io/router.middlewares: zipline-zipline-no-body-limit@kubernetescrd
     hosts:
       - host: zipline.snekxs.xyz
         paths:
@@ -77,5 +79,3 @@ ingress:
       - hosts:
           - zipline.snekxs.xyz
         secretName: zipline-tls
-
-
