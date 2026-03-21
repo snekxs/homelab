@@ -66,7 +66,6 @@ ingress:
     className: traefik
     annotations:
       cert-manager.io/cluster-issuer: letsencrypt-cloudflare
-      traefik.ingress.kubernetes.io/router.middlewares: zipline-zipline-no-body-limit@kubernetescrd
     hosts:
       - host: zipline.snekxs.xyz
         paths:

@@ -15,9 +15,6 @@ spec:
     - repoURL: https://github.com/snekxs/homelab
       targetRevision: HEAD
       ref: values
-    - repoURL: https://github.com/snekxs/homelab
-      targetRevision: HEAD
-      path: apps/zipline/manifests
   destination:
     server: https://kubernetes.default.svc
     namespace: zipline
